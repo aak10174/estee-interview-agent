@@ -1,0 +1,440 @@
+<title>Interview Vault Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F5F5F8;
+    --surface: #FFFFFF;
+    --sunken: #EDEDF2;
+    --ink: #17161C;
+    --muted: #605E6E;
+    --line: #DDDBE5;
+    --line-strong: #BFBCCC;
+    --accent: #57068C;
+    --accent-soft: #F0E7F7;
+    --amber: #9A5B12;
+    --amber-soft: #F7EEE1;
+    --display: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131218;
+      --surface: #1C1A23;
+      --sunken: #17161D;
+      --ink: #EDEBF2;
+      --muted: #A09DAE;
+      --line: #2E2B38;
+      --line-strong: #474355;
+      --accent: #C79BEA;
+      --accent-soft: #291B38;
+      --amber: #E0A45C;
+      --amber-soft: #2E2312;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131218;
+    --surface: #1C1A23;
+    --sunken: #17161D;
+    --ink: #EDEBF2;
+    --muted: #A09DAE;
+    --line: #2E2B38;
+    --line-strong: #474355;
+    --accent: #C79BEA;
+    --accent-soft: #291B38;
+    --amber: #E0A45C;
+    --amber-soft: #2E2312;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    padding-block: 56px 80px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(22px, 3.4vw, 28px);
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 6px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 64ch; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  section { display: flex; flex-direction: column; gap: 18px; }
+  .section-head { display: flex; flex-direction: column; gap: 2px; }
+  .section-head p { color: var(--muted); }
+
+  code, .mono { font-family: var(--mono); font-size: 0.88em; }
+  code { background: var(--sunken); padding: 1px 5px; border-radius: 3px; }
+
+  header { border-bottom: 1px solid var(--line); padding-bottom: 34px; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 10px 28px;
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+    margin-top: 22px;
+  }
+  .meta b { color: var(--ink); font-weight: 500; }
+
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px 20px 16px;
+  }
+  figure svg { display: block; width: 100%; max-width: 100%; height: auto; }
+  .scroller { overflow-x: auto; }
+  .scroller > svg { min-width: 620px; }
+  figcaption {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted); max-width: 72ch;
+  }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  /* SVG element styling — kept out of the SVG so both themes resolve */
+  .node { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.25; }
+  .node-data { fill: var(--sunken); stroke: var(--line-strong); stroke-width: 1.25; }
+  .node-model { fill: var(--amber-soft); stroke: var(--amber); stroke-width: 1.5; }
+  .node-out { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+  .zone { fill: none; stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 5 4; }
+  .flow { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+  .label { fill: var(--ink); font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 600; }
+  .sub { fill: var(--muted); font-family: "IBM Plex Mono", monospace; font-size: 10.5px; }
+  .edge { fill: var(--muted); font-family: "IBM Plex Mono", monospace; font-size: 10.5px; }
+  .zone-label { fill: var(--muted); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; }
+  .tag { fill: var(--amber); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; }
+  .head { fill: var(--ink); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .scroller table { min-width: 560px; }
+  th, td { text-align: left; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  td:first-child { font-family: var(--mono); font-size: 13px; white-space: nowrap; padding-right: 22px; }
+  td .calls { color: var(--amber); font-family: var(--mono); font-size: 11.5px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-family: var(--mono); font-size: 12px;
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 4px 12px; color: var(--muted);
+  }
+  .chip.on { border-color: var(--accent); color: var(--accent); }
+
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; }
+  .panel.warn { border-left: 3px solid var(--amber); }
+  .panel.safe { border-left: 3px solid var(--accent); }
+  .panel ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14.5px; }
+  .panel li { margin-bottom: 5px; }
+  .panel li:last-child { margin-bottom: 0; }
+  .panel li b { color: var(--ink); font-weight: 500; font-family: var(--mono); font-size: 13px; }
+
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 14px; align-items: start; }
+  ol.steps li::before {
+    content: counter(s);
+    font-family: var(--mono); font-size: 12px; line-height: 26px; text-align: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: var(--bg);
+  }
+  ol.steps p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  ol.steps b { color: var(--ink); font-weight: 600; }
+  ol.steps code { font-size: 13px; }
+
+  footer { border-top: 1px solid var(--line); padding-top: 26px; color: var(--muted); font-size: 14.5px; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">System architecture</p>
+    <h1>Reading twelve interviews the same way twice</h1>
+    <p class="lede">A pipeline that turns consumer interview transcripts into a structured markdown vault, finds what
+    several people said <strong>independently</strong>, and answers questions about it over Telegram — so the argument put in
+    front of Estée Lauder traces back to a named participant and a verbatim quote, every time.</p>
+    <div class="meta">
+      <span><b>Language</b> Python 3.9+</span>
+      <span><b>Model</b> Claude, 2 call types</span>
+      <span><b>State</b> plain markdown, in git</span>
+      <span><b>Runs on</b> cron or GitHub Actions</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>The flow</h2>
+      <p>Every arrow is a file being written or read. There is no database and no hidden state — if a claim is in the
+      synthesis, the note it came from is sitting in the repo next to it.</p>
+    </div>
+
+    <figure>
+      <div class="scroller">
+      <svg viewBox="0 0 880 530" role="img" aria-label="Transcripts flow into analyze.py, which calls Claude once per interview and writes a structured note into the vault. Synthesize.py reads every note in one Claude call and writes the synthesis. The scheduled pipeline summarises that into a Telegram digest, while bot.py separately reads the vault to answer questions from Telegram.">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" class="head"></path>
+          </marker>
+        </defs>
+
+        <rect class="zone" x="285" y="32" width="230" height="392" rx="5"></rect>
+        <text class="zone-label" x="285" y="22">PIPELINE.PY — ONE SCHEDULED RUN</text>
+
+        <rect class="node-data" x="40" y="54" width="190" height="64" rx="4"></rect>
+        <text class="label" x="56" y="80">interviews/</text>
+        <text class="sub" x="56" y="99">raw transcripts you drop in</text>
+
+        <rect class="node-model" x="300" y="54" width="200" height="64" rx="4"></rect>
+        <text class="label" x="316" y="78">analyze.py</text>
+        <text class="tag" x="316" y="96">CLAUDE · 1 CALL PER INTERVIEW</text>
+        <text class="sub" x="316" y="111">skips unchanged files</text>
+
+        <rect class="node-data" x="570" y="54" width="230" height="64" rx="4"></rect>
+        <text class="label" x="586" y="80">vault/interviews/*.md</text>
+        <text class="sub" x="586" y="99">one structured note per person</text>
+
+        <line class="flow" x1="230" y1="86" x2="294" y2="86" marker-end="url(#a1)"></line>
+        <text class="edge" x="262" y="78" text-anchor="middle">new / changed</text>
+        <line class="flow" x1="500" y1="86" x2="564" y2="86" marker-end="url(#a1)"></line>
+        <text class="edge" x="532" y="78" text-anchor="middle">extraction JSON</text>
+
+        <polyline class="flow" points="685,118 685,164 400,164 400,198" marker-end="url(#a1)"></polyline>
+        <text class="edge" x="545" y="156" text-anchor="middle">all notes, every run</text>
+
+        <rect class="node-model" x="300" y="204" width="200" height="64" rx="4"></rect>
+        <text class="label" x="316" y="228">synthesize.py</text>
+        <text class="tag" x="316" y="246">CLAUDE · 1 CALL, WHOLE VAULT</text>
+        <text class="sub" x="316" y="261">counts who backs what</text>
+
+        <rect class="node-out" x="570" y="204" width="230" height="64" rx="4"></rect>
+        <text class="label" x="586" y="228">vault/synthesis/latest.md</text>
+        <text class="sub" x="586" y="247">intersections · tensions · call</text>
+
+        <line class="flow" x1="500" y1="236" x2="564" y2="236" marker-end="url(#a1)"></line>
+        <text class="edge" x="532" y="228" text-anchor="middle">+ dated copy</text>
+
+        <text class="edge" x="420" y="294" text-anchor="middle">reads the whole vault</text>
+        <polyline class="flow" points="580,268 580,300 260,300 260,476 294,476" marker-end="url(#a1)"></polyline>
+
+        <polyline class="flow" points="685,268 685,320 400,320 400,338" marker-end="url(#a1)"></polyline>
+        <text class="edge" x="600" y="314" text-anchor="middle">summarise to 200 words</text>
+
+        <rect class="node" x="300" y="344" width="200" height="64" rx="4"></rect>
+        <text class="label" x="316" y="370">digest</text>
+        <text class="sub" x="316" y="389">what changed since yesterday</text>
+
+        <rect class="node" x="300" y="444" width="200" height="64" rx="4"></rect>
+        <text class="label" x="316" y="470">bot.py</text>
+        <text class="sub" x="316" y="489">long-poll · laptop</text>
+
+        <rect class="node-out" x="600" y="344" width="200" height="164" rx="4"></rect>
+        <text class="label" x="616" y="374">Telegram</text>
+        <text class="sub" x="616" y="393">your phone</text>
+
+        <line class="flow" x1="500" y1="440" x2="594" y2="440" marker-end="url(#a1)"></line>
+        <text class="edge" x="547" y="432" text-anchor="middle">07:00 digest</text>
+        <line class="flow" x1="600" y1="466" x2="506" y2="466" marker-end="url(#a1)"></line>
+        <text class="edge" x="553" y="458" text-anchor="middle">question</text>
+        <line class="flow" x1="500" y1="492" x2="594" y2="492" marker-end="url(#a1)"></line>
+        <text class="edge" x="547" y="484" text-anchor="middle">answer, with quotes</text>
+      </svg>
+      </div>
+      <figcaption>The two <b>amber</b> boxes are the only places a model is called, and they are called differently:
+      <b>analyze.py</b> sees one interview at a time and cannot know what anyone else said, so it cannot flatten twelve
+      people into an average. <b>synthesize.py</b> sees all of them at once — that is where an intersection can be found,
+      and where a count of "4 of 12" comes from. <b>bot.py</b> sits outside the dashed box because it is not scheduled:
+      it is a separate process, reading the same files, running wherever the laptop is.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>What each file is responsible for</h2>
+      <p>Seven modules, one job each. The model is reached through exactly one of them.</p>
+    </div>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Module</th><th>Job</th><th>Talks to Claude</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>claude.py</td><td>The only place the API is called. Swapping the key or the model is a one-line change here.</td><td><span class="calls">—</span></td></tr>
+          <tr><td>analyze.py</td><td>One transcript → one structured note. Hashes the source file, so re-runs skip work already done.</td><td><span class="calls">1 × per interview</span></td></tr>
+          <tr><td>synthesize.py</td><td>Every note → intersections, tensions, outliers, and a recommendation with its counter-evidence.</td><td><span class="calls">1 × per run</span></td></tr>
+          <tr><td>vault.py</td><td>Loads the notes and answers a plain-language question against them, with aliases cited.</td><td><span class="calls">1 × per question</span></td></tr>
+          <tr><td>bot.py</td><td>Telegram long-polling loop. Remembers its offset, so restarts don't replay old messages.</td><td><span class="calls">—</span></td></tr>
+          <tr><td>telegram.py</td><td>Raw HTTP to the Telegram API. Splits messages at the 4096-character limit.</td><td><span class="calls">—</span></td></tr>
+          <tr><td>pipeline.py</td><td>Analyse → synthesise → digest. What the scheduler actually runs.</td><td><span class="calls">1 × for the digest</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>What one note holds</h2>
+      <p>Each interview is extracted into the same shape, and every field carries the verbatim quote it was drawn from.
+      The three fields in violet are the ones the synthesis reads to decide which strategic question the research can
+      actually answer — the interviews decide, not us.</p>
+    </div>
+    <div class="chips">
+      <span class="chip">participant</span>
+      <span class="chip">summary</span>
+      <span class="chip">brand perception</span>
+      <span class="chip">unmet needs</span>
+      <span class="chip">discovery channels</span>
+      <span class="chip">purchase drivers</span>
+      <span class="chip">purchase barriers</span>
+      <span class="chip">price sensitivity</span>
+      <span class="chip">product preferences</span>
+      <span class="chip">competitors chosen instead</span>
+      <span class="chip">notable quotes</span>
+      <span class="chip">tensions</span>
+      <span class="chip on">signal · attracting Gen Z</span>
+      <span class="chip on">signal · channel investment</span>
+      <span class="chip on">signal · portfolio direction</span>
+    </div>
+    <p style="color: var(--muted); font-size: 14.5px;">A field nobody discussed comes back as <code>not discussed</code>
+    rather than a plausible guess. That is the difference between a vault you can defend in a room and one that reads
+    well until someone asks where a number came from.</p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Two places it can run on a schedule</h2>
+      <p>Same pipeline, same code. What changes is whether the laptop has to be awake, and whether the vault comes back
+      into the repo on its own.</p>
+    </div>
+    <figure>
+      <div class="scroller">
+      <svg viewBox="0 0 880 300" role="img" aria-label="Option A runs the pipeline from crontab on the laptop and sends the digest. Option B runs the same pipeline on GitHub Actions, which additionally commits the vault back to the repository and works with the laptop closed. The bot runs on the laptop in both options.">
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" class="head"></path>
+          </marker>
+        </defs>
+
+        <text class="label" x="20" y="20">Option A · your laptop</text>
+        <rect class="zone" x="20" y="34" width="400" height="212" rx="5"></rect>
+        <text class="zone-label" x="36" y="234">LAPTOP MUST BE AWAKE AT 07:00</text>
+
+        <rect class="node" x="50" y="54" width="340" height="46" rx="4"></rect>
+        <text class="sub" x="66" y="82">crontab · 0 7 * * * run.sh</text>
+        <line class="flow" x1="220" y1="100" x2="220" y2="118" marker-end="url(#a2)"></line>
+        <rect class="node" x="50" y="124" width="340" height="46" rx="4"></rect>
+        <text class="sub" x="66" y="152">pipeline.py · logs to .state/pipeline.log</text>
+        <line class="flow" x1="220" y1="170" x2="220" y2="188" marker-end="url(#a2)"></line>
+        <rect class="node-out" x="50" y="194" width="340" height="26" rx="4"></rect>
+        <text class="sub" x="66" y="212">digest → Telegram</text>
+
+        <text class="label" x="460" y="20">Option B · GitHub Actions</text>
+        <rect class="zone" x="460" y="34" width="400" height="212" rx="5"></rect>
+        <text class="zone-label" x="476" y="234">RUNS WITH THE LID CLOSED</text>
+
+        <rect class="node" x="490" y="54" width="340" height="46" rx="4"></rect>
+        <text class="sub" x="506" y="82">Actions cron · 23:00 UTC = 07:00 CST</text>
+        <line class="flow" x1="660" y1="100" x2="660" y2="118" marker-end="url(#a2)"></line>
+        <rect class="node" x="490" y="124" width="340" height="46" rx="4"></rect>
+        <text class="sub" x="506" y="152">pipeline.py · keys from repo secrets</text>
+        <line class="flow" x1="660" y1="170" x2="660" y2="188" marker-end="url(#a2)"></line>
+        <rect class="node-out" x="490" y="194" width="340" height="26" rx="4"></rect>
+        <text class="sub" x="506" y="212">digest → Telegram  +  git commit vault/</text>
+
+        <rect class="node-data" x="20" y="262" width="840" height="30" rx="4"></rect>
+        <text class="sub" x="36" y="281">Either way: bot.py stays on the laptop. A long-poll loop needs a live process; only the pipeline moves to the cloud.</text>
+      </svg>
+      </div>
+      <figcaption>The single real difference is the last box: <b>Option B commits the vault back to the repository</b>, so
+      the notes and each dated synthesis accumulate in git history and anyone who clones gets the current state. Option A
+      leaves them on one laptop until someone remembers to push. Both send the same digest.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Where the secrets live</h2>
+      <p>This repo is meant to be handed to someone else and made public. That constraint shaped the layout.</p>
+    </div>
+    <div class="split">
+      <div class="panel safe">
+        <h3>Ships in the repo</h3>
+        <ul>
+          <li><b>.env.example</b> — the shape of the config, no values</li>
+          <li><b>src/</b> — all seven modules</li>
+          <li><b>vault/</b> — notes and synthesis, meant to be read</li>
+          <li><b>interviews/</b> — transcripts, once you decide they can be public</li>
+        </ul>
+      </div>
+      <div class="panel warn">
+        <h3>Never leaves the machine</h3>
+        <ul>
+          <li><b>.env</b> — API key, bot token, chat id. Gitignored.</li>
+          <li><b>.state/</b> — poll offset and run logs. Gitignored.</li>
+          <li>On GitHub Actions the same three values come from <b>repo secrets</b>, which are write-only once set.</li>
+        </ul>
+      </div>
+    </div>
+    <p style="color: var(--muted); font-size: 14.5px;">Consent is the open question, not the code: transcripts are
+    identifiable even under an alias if the interview is specific enough. Decide whether <code>interviews/</code> goes
+    public before the first push, because git remembers.</p>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Handing it over</h2>
+      <p>Three commands, in this order — the account you are authenticated as when you create the repo is the account
+      that owns it.</p>
+    </div>
+    <ol class="steps">
+      <li><div><b>Authenticate as him.</b><p><code>gh auth login</code> — his GitHub account, on your laptop.</p></div></li>
+      <li><div><b>Create and push.</b><p><code>gh repo create estee-agent --public --source=. --push</code> — the repo is created under his account, with your commits intact.</p></div></li>
+      <li><div><b>Switch back.</b><p><code>gh auth switch</code> — then he clones, runs <code>make setup</code>, and puts his own key and bot token into <code>.env</code>. Nothing else changes; your key never left your laptop.</p></div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>One caveat worth keeping next to the output: this system reports patterns in what people <em>said</em>. Interviews
+    over-represent whoever agreed to be interviewed, and people are unreliable narrators of their own spending. The
+    synthesis is a sharpened set of hypotheses for Estée Lauder to test — not a measurement of the market.</p>
+  </footer>
+
+</div>
