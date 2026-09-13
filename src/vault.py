@@ -29,10 +29,13 @@ def answer(question):
     context = load_context()
     if not context.strip():
         return "The vault is empty. Add transcripts to interviews/ and run the pipeline."
+    # The vault goes in the cached system block and the question in the message,
+    # so a follow-up question re-reads the vault at a tenth of the price.
     return ask(
-        "VAULT\n=====\n" + context + "\n\nQUESTION: " + question,
-        system=SYSTEM,
+        "QUESTION: " + question,
+        system=SYSTEM + "\n\nVAULT\n=====\n" + context,
         max_tokens=2000,
+        cache_system=True,
     )
 
 

@@ -13,7 +13,7 @@ import analyze
 import synthesize
 import telegram
 from claude import ask
-from config import SYNTHESIS_DIR, TELEGRAM_CHAT_ID
+from config import DIGEST_MODEL, SYNTHESIS_DIR, TELEGRAM_CHAT_ID
 
 DIGEST_PROMPT = (
     "Here is the latest cross-interview synthesis. Write a Telegram digest of at "
@@ -38,7 +38,7 @@ def main(force=False, notify=True):
         print("TELEGRAM_CHAT_ID not set — skipping digest.")
         return
     text = (SYNTHESIS_DIR / "latest.md").read_text()
-    digest = ask(DIGEST_PROMPT + text, max_tokens=800)
+    digest = ask(DIGEST_PROMPT + text, model=DIGEST_MODEL, max_tokens=800)
     header = "Interview vault updated: %d new note(s).\n\n" % len(new_notes)
     telegram.send(header + digest)
     print("Digest sent.")

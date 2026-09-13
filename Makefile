@@ -1,4 +1,4 @@
-.PHONY: setup run bot chatid synth clean
+.PHONY: setup run cost bot chatid synth clean
 
 setup:          ## create venv and install dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -7,6 +7,9 @@ setup:          ## create venv and install dependencies
 
 run:            ## full pipeline: analyse -> synthesise -> Telegram digest
 	.venv/bin/python src/pipeline.py
+
+cost:           ## price the next run without spending anything
+	.venv/bin/python src/estimate.py
 
 synth:          ## re-run only the cross-interview synthesis
 	.venv/bin/python src/synthesize.py

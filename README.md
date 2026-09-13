@@ -48,6 +48,37 @@ Add ~$5 of credit. A 20-interview study costs a few dollars.
 make chatid         # prints your chat_id -> paste into .env
 ```
 
+## What it costs
+
+Roughly **$4–10 for an entire 12-interview study**, including a few hundred bot
+questions. Check before you spend:
+
+```bash
+make cost            # counts tokens (free) and prices the next run
+```
+
+Each job runs on the model that job needs, set per-task in `.env`:
+
+| Job | Default | Why | Per unit |
+|---|---|---|---|
+| Extraction | `claude-sonnet-5` | mechanical: read one transcript, fill a schema | ~$0.03 / interview |
+| Synthesis | `claude-opus-5` | the reasoning step — this is the one worth paying for | ~$0.21 / run |
+| Digest | `claude-haiku-4-5` | a 200-word rewrite of text that already exists | ~$0.006 / day |
+| Bot answers | `claude-sonnet-5` | ~$0.06 cold, **~$0.009 cached** | per question |
+
+Three things keep the bill down without touching quality:
+
+1. **Nothing is re-analysed.** Each note stores a hash of its transcript; a run
+   with no new transcripts costs nothing at all and exits.
+2. **The vault is cached for the bot.** It sits in a cached system prompt, so the
+   second and later questions in a session re-read it at a tenth of the price.
+   Every call prints its own token usage, so a cache miss is visible immediately.
+3. **The digest uses Haiku.** It is rewriting the synthesis, not producing it.
+
+Want it cheaper still? Set `ANTHROPIC_MODEL=claude-haiku-4-5` for extraction
+(halves it) and `ANTHROPIC_SYNTHESIS_MODEL=claude-sonnet-5`. Compare the output
+before you keep it — synthesis is where the model quality actually shows.
+
 ## Daily use
 
 ```bash

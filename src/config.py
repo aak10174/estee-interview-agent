@@ -14,8 +14,11 @@ SYNTHESIS_DIR = VAULT_DIR / "synthesis"
 STATE_DIR = ROOT / ".state"
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+# One model per job. Extraction is mechanical (cheap model is fine); synthesis is
+# the reasoning step worth paying for; the digest is a 200-word rewrite.
 MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5")
 SYNTHESIS_MODEL = os.getenv("ANTHROPIC_SYNTHESIS_MODEL", "claude-opus-5")
+DIGEST_MODEL = os.getenv("ANTHROPIC_DIGEST_MODEL", "claude-haiku-4-5")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
