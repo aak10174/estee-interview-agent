@@ -81,7 +81,7 @@ def is_current(path):
     note = note_path(path)
     if not note.exists():
         return False
-    return ("source_hash: " + fingerprint(path)) in note.read_text()
+    return ("source_hash: " + fingerprint(path)) in note.read_text(encoding="utf-8")
 
 
 def render_note(path, data):
@@ -157,7 +157,7 @@ def render_note(path, data):
 
 
 def analyse(path):
-    transcript = path.read_text(errors="replace")
+    transcript = path.read_text(encoding="utf-8", errors="replace")
     prompt = (
         "Analyse this consumer interview transcript.\n\n"
         + SCHEMA_BRIEF
@@ -169,7 +169,7 @@ def analyse(path):
     )
     data = ask_json(prompt, system=SYSTEM)
     note = note_path(path)
-    note.write_text(render_note(path, data))
+    note.write_text(render_note(path, data), encoding="utf-8")
     return note
 
 

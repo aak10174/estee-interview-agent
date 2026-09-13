@@ -74,7 +74,7 @@ def run():
         raise SystemExit("No interview notes in the vault yet. Run analyze.py first.")
 
     blob = "\n\n---\n\n".join(
-        "### FILE: " + p.name + "\n" + p.read_text().split("<!-- raw extraction -->")[0]
+        "### FILE: " + p.name + "\n" + p.read_text(encoding="utf-8").split("<!-- raw extraction -->")[0]
         for p in notes
     )
     body = ask(
@@ -101,8 +101,8 @@ def run():
     text = header + body + "\n"
 
     latest = SYNTHESIS_DIR / "latest.md"
-    latest.write_text(text)
-    (SYNTHESIS_DIR / ("synthesis-" + today + ".md")).write_text(text)
+    latest.write_text(text, encoding="utf-8")
+    (SYNTHESIS_DIR / ("synthesis-" + today + ".md")).write_text(text, encoding="utf-8")
     return latest
 
 

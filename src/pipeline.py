@@ -37,7 +37,7 @@ def main(force=False, notify=True):
     if not TELEGRAM_CHAT_ID:
         print("TELEGRAM_CHAT_ID not set — skipping digest.")
         return
-    text = (SYNTHESIS_DIR / "latest.md").read_text()
+    text = (SYNTHESIS_DIR / "latest.md").read_text(encoding="utf-8")
     digest = ask(DIGEST_PROMPT + text, model=DIGEST_MODEL, max_tokens=800)
     header = "Interview vault updated: %d new note(s).\n\n" % len(new_notes)
     telegram.send(header + digest)

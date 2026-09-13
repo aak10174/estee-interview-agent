@@ -26,12 +26,12 @@ HELP = (
 
 def read_offset():
     if OFFSET_FILE.exists():
-        return int(OFFSET_FILE.read_text().strip())
+        return int(OFFSET_FILE.read_text(encoding="utf-8").strip())
     return None
 
 
 def write_offset(value):
-    OFFSET_FILE.write_text(str(value))
+    OFFSET_FILE.write_text(str(value), encoding="utf-8")
 
 
 def handle(text):
@@ -46,7 +46,7 @@ def handle(text):
         latest = SYNTHESIS_DIR / "latest.md"
         if not latest.exists():
             return "No synthesis yet. Run: python src/pipeline.py"
-        return latest.read_text()
+        return latest.read_text(encoding="utf-8")
     return vault.answer(text)
 
 

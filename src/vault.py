@@ -16,11 +16,11 @@ def load_context():
     parts = []
     latest = SYNTHESIS_DIR / "latest.md"
     if latest.exists():
-        parts.append("=== CURRENT SYNTHESIS ===\n" + latest.read_text())
+        parts.append("=== CURRENT SYNTHESIS ===\n" + latest.read_text(encoding="utf-8"))
     for p in sorted(NOTES_DIR.glob("*.md")):
         parts.append(
             "=== NOTE: " + p.name + " ===\n"
-            + p.read_text().split("<!-- raw extraction -->")[0]
+            + p.read_text(encoding="utf-8").split("<!-- raw extraction -->")[0]
         )
     return "\n\n".join(parts)
 
@@ -44,7 +44,7 @@ def stats():
     syn = SYNTHESIS_DIR / "latest.md"
     when = "never"
     if syn.exists():
-        for line in syn.read_text().splitlines()[:8]:
+        for line in syn.read_text(encoding="utf-8").splitlines()[:8]:
             if line.startswith("generated: "):
                 when = line.split(": ", 1)[1]
     return "Vault: %d interview note(s). Synthesis last generated: %s." % (n, when)

@@ -38,14 +38,14 @@ def main():
     total = 0.0
 
     for path in pending:
-        tin = count(MODEL, analyze.SCHEMA_BRIEF + path.read_text(errors="replace"))
+        tin = count(MODEL, analyze.SCHEMA_BRIEF + path.read_text(encoding="utf-8", errors="replace"))
         cost = price(MODEL, tin, OUT_NOTE)
         total += cost
         rows.append(("analyse %s" % path.name, MODEL, tin, cost))
 
     notes = list(NOTES_DIR.glob("*.md"))
     if pending or notes:
-        blob = "\n".join(p.read_text() for p in notes)
+        blob = "\n".join(p.read_text(encoding="utf-8") for p in notes)
         tin = count(SYNTHESIS_MODEL, synthesize.PROMPT + blob)
         cost = price(SYNTHESIS_MODEL, tin, OUT_SYNTH)
         total += cost
