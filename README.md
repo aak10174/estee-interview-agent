@@ -95,7 +95,7 @@ git clone https://github.com/aak10174/estee-interview-agent.git
 cd estee-interview-agent
 
 py -m venv .venv
-.venv\Scripts\activate
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
 copy .env.example .env
@@ -112,8 +112,30 @@ Every `make` command in this README maps to a plain Python one:
 | `make bot` | `python src/bot.py` |
 | `make chatid` | `python src/telegram.py` |
 
-Activate the venv (`.venv\Scripts\activate`) in each new PowerShell window before
-running any of them — the prompt shows `(.venv)` when it's active.
+Activate the venv in each new PowerShell window before running any of them — the
+prompt shows `(.venv)` when it's active.
+
+**PowerShell needs the leading `.\`.** Writing `.venv\Scripts\activate` without it
+gives `The module '.venv' could not be loaded` — PowerShell refuses to run programs
+from the current folder unless the path starts with `.\`, and reads the bare name as
+a module instead.
+
+If activation gives an execution-policy error, run this once and retry:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Or skip activation entirely and name the venv's Python directly — this always works
+and is what the Makefile does on macOS:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe src\pipeline.py
+```
+
+Paste one command at a time. Pasting several lines at once makes PowerShell show a
+`>>` continuation prompt and run them in a way that hides which one failed.
 
 ## Daily use
 
