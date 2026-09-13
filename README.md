@@ -132,23 +132,30 @@ Ask the bot things like:
 - `/synthesis` — the current recommendation
 - `/status` — how many interviews are in the vault
 
-## Running it on a schedule
+## Running it
 
-**Option A — your laptop (no extra accounts).** Runs daily at 07:00 when the
-laptop is awake:
-```bash
-crontab -e
-# add this line, with the real path:
-0 7 * * * /Users/you/path/to/estee-agent/run.sh
+The pipeline is **run by hand**, on whichever laptop holds the transcripts:
+
 ```
-Output goes to `.state/pipeline.log`.
+python src/pipeline.py        # Windows
+make run                      # macOS / Linux
+```
 
-**Option B — GitHub Actions (runs even when the laptop is closed).**
-`.github/workflows/pipeline.yml` is ready. Add three repo secrets under
-Settings → Secrets and variables → Actions: `ANTHROPIC_API_KEY`,
-`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`. It commits new vault notes back to the
-repo each night. Note: the *bot* still needs a laptop; only the pipeline moves
-to the cloud.
+It is safe to run as often as you like. Each vault note stores a hash of the
+transcript it came from, so a run with nothing new prints `No new or changed
+transcripts` and costs nothing — no model is called at all.
+
+Nothing is scheduled, by choice. Two options exist if that changes:
+
+- **GitHub Actions** — `.github/workflows/pipeline.yml` is kept in the repo and can
+  be run from the Actions tab (Run workflow) with no laptop involved. It needs the
+  three secrets listed at the top of that file. Uncomment its `schedule:` lines to
+  make it nightly — but only after the secrets exist, or it fails every night and
+  emails the repo owner.
+- **Local cron (macOS/Linux)** — `run.sh` is a ready-made wrapper: `crontab -e`,
+  then `0 7 * * * /full/path/to/run.sh`. Only fires while the laptop is awake, and
+  on macOS needs Full Disk Access granted to `/usr/sbin/cron` if the project lives
+  under `~/Desktop` or `~/Documents`.
 
 ## Handing this over
 

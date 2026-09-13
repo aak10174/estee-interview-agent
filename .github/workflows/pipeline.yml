@@ -1,12 +1,18 @@
 name: interview-pipeline
 
-# Optional cloud scheduler. It runs the same pipeline as run.sh, commits new
-# vault notes back to the repo, and sends the Telegram digest.
-# Before enabling, add repo secrets: ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN,
-# TELEGRAM_CHAT_ID  (Settings -> Secrets and variables -> Actions).
+# Manual only, by choice: the pipeline is run by hand from a laptop.
+#
+# This job is kept because it is the one way to run the pipeline with no laptop
+# involved. To use it: run it from the Actions tab (Run workflow), which needs
+# three repo secrets first - ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN,
+# TELEGRAM_CHAT_ID, under Settings -> Secrets and variables -> Actions.
+#
+# To make it nightly instead, uncomment the two schedule lines below. Do not
+# uncomment them before the secrets exist, or it fails every night and emails
+# the repo owner about it.
 on:
-  schedule:
-    - cron: "0 23 * * *"   # 23:00 UTC = 07:00 China Standard Time
+  # schedule:
+  #   - cron: "0 23 * * *"   # 23:00 UTC = 07:00 China Standard Time
   workflow_dispatch:
 
 permissions:
