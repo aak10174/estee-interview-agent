@@ -79,6 +79,42 @@ Want it cheaper still? Set `ANTHROPIC_MODEL=claude-haiku-4-5` for extraction
 (halves it) and `ANTHROPIC_SYNTHESIS_MODEL=claude-sonnet-5`. Compare the output
 before you keep it — synthesis is where the model quality actually shows.
 
+## Setup on Windows
+
+`make` does not exist on Windows, so run the Python commands directly. Install two
+things first, then reopen PowerShell so `PATH` picks them up:
+
+1. **Git** — https://git-scm.com/download/win (accept every default)
+2. **Python** — https://python.org/downloads — on the first screen tick
+   **"Add python.exe to PATH"**. Miss that box and `python` won't be found either.
+
+Then:
+
+```powershell
+git clone https://github.com/aak10174/estee-interview-agent.git
+cd estee-interview-agent
+
+py -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+copy .env.example .env
+notepad .env            # add ANTHROPIC_API_KEY and the Telegram values, then save
+```
+
+Every `make` command in this README maps to a plain Python one:
+
+| macOS / Linux | Windows |
+|---|---|
+| `make cost` | `python src/estimate.py` |
+| `make run` | `python src/pipeline.py` |
+| `make synth` | `python src/synthesize.py` |
+| `make bot` | `python src/bot.py` |
+| `make chatid` | `python src/telegram.py` |
+
+Activate the venv (`.venv\Scripts\activate`) in each new PowerShell window before
+running any of them — the prompt shows `(.venv)` when it's active.
+
 ## Daily use
 
 ```bash
