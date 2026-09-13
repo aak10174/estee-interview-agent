@@ -35,7 +35,12 @@ def write_offset(value):
 
 
 def handle(text):
-    cmd = text.strip().split()[0].lower() if text.strip() else ""
+    # Only treat a message as a command when the command is the whole message.
+    # "/status" is a command; "/status what about price?" is a question, and
+    # answering just the "/status" half would silently drop what was asked.
+    cmd = text.strip().lower()
+    if cmd not in ("/start", "/help", "/status", "/synthesis"):
+        cmd = ""
     if cmd in ("/start", "/help"):
         return HELP
     if cmd == "/status":
