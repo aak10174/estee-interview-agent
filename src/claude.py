@@ -45,7 +45,14 @@ def ask(prompt, system=None, model=None, max_tokens=8000, cache_system=False):
     elif system:
         kwargs["system"] = system
 
-    resp = client().messages.create(**kwargs)
+    try:
+        resp = client().messages.create(**kwargs)
+    except anthropic.NotFoundError:
+        raise SystemExit(
+            "Model %r does not exist. Check the model names in .env, or delete\n"
+            "those lines entirely to fall back to the defaults in src/config.py."
+            % kwargs["model"]
+        )
     _log_usage(resp)
     return "".join(b.text for b in resp.content if b.type == "text").strip()
 
