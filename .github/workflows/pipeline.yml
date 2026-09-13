@@ -1,0 +1,35 @@
+name: interview-pipeline
+
+# Optional cloud scheduler. It runs the same pipeline as run.sh, commits new
+# vault notes back to the repo, and sends the Telegram digest.
+# Before enabling, add repo secrets: ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN,
+# TELEGRAM_CHAT_ID  (Settings -> Secrets and variables -> Actions).
+on:
+  schedule:
+    - cron: "0 23 * * *"   # 23:00 UTC = 07:00 China Standard Time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python src/pipeline.py
+      - name: Commit vault updates
+        run: |
+          git config user.name "interview-pipeline"
+          git config user.email "actions@github.com"
+          git add vault
+          git diff --staged --quiet || git commit -m "vault: automated update $(date -u +%F)"
+          git push
