@@ -53,8 +53,13 @@ def ask(prompt, system=None, model=None, max_tokens=8000, cache_system=False):
 def _log_usage(resp):
     """Print what the call cost in tokens. Cheap insurance against surprises."""
     u = resp.usage
-    cached = getattr(u, "cache_read_input_tokens", 0) or 0
-    note = "  (%d from cache)" % cached if cached else ""
+    read = getattr(u, "cache_read_input_tokens", 0) or 0
+    written = getattr(u, "cache_creation_input_tokens", 0) or 0
+    note = ""
+    if read:
+        note = "  + %d read from cache (10%% price)" % read
+    elif written:
+        note = "  + %d written to cache, free to re-read for 1h" % written
     print(
         "    %s: %d in / %d out%s"
         % (resp.model, u.input_tokens, u.output_tokens, note)
